@@ -56,7 +56,6 @@ class ConvBlock(nn.Module):
 
 
 class Bottleneck(nn.Module):
-
     expansion = 4
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
@@ -66,7 +65,8 @@ class Bottleneck(nn.Module):
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
                                padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
-        self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
+        self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1,
+                               bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
@@ -160,16 +160,24 @@ class FAN(nn.Module):
             self.add_module('m' + str(hg_module), HourGlass(1, 4, 256))
             self.add_module('top_m_' + str(hg_module), ConvBlock(256, 256))
             self.add_module('conv_last' + str(hg_module),
-                            nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0))
+                            nn.Conv2d(256, 256, kernel_size=1, stride=1,
+                                      padding=0))
             self.add_module('l' + str(hg_module), nn.Conv2d(256,
-                                                            68, kernel_size=1, stride=1, padding=0))
+                                                            68,
+                                                            kernel_size=1,
+                                                            stride=1,
+                                                            padding=0))
             self.add_module('bn_end' + str(hg_module), nn.BatchNorm2d(256))
 
             if hg_module < self.num_modules - 1:
                 self.add_module(
-                    'bl' + str(hg_module), nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0))
+                    'bl' + str(hg_module),
+                    nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0))
                 self.add_module('al' + str(hg_module), nn.Conv2d(68,
-                                                                 256, kernel_size=1, stride=1, padding=0))
+                                                                 256,
+                                                                 kernel_size=1,
+                                                                 stride=1,
+                                                                 padding=0))
 
     def forward(self, x):
         x = F.relu(self.bn1(self.conv1(x)), True)
@@ -203,10 +211,12 @@ class FAN(nn.Module):
 
 class ResNetDepth(nn.Module):
 
-    def __init__(self, block=Bottleneck, layers=[3, 8, 36, 3], num_classes=68):
+    def __init__(self, block=Bottleneck, layers=[3, 8, 36, 3],
+                 num_classes=68):
         self.inplanes = 64
         super(ResNetDepth, self).__init__()
-        self.conv1 = nn.Conv2d(3 + 68, 64, kernel_size=7, stride=2, padding=3,
+        self.conv1 = nn.Conv2d(3 + 68, 64, kernel_size=7, stride=2,
+                               padding=3,
                                bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)

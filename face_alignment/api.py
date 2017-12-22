@@ -7,6 +7,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from enum import Enum
 from skimage import io
+
 try:
     import urllib.request as request_file
 except BaseException:
@@ -69,6 +70,8 @@ class FaceAlignment:
         if enable_cudnn and self.enable_cuda:
             torch.backends.cudnn.benchmark = True
 
+        # todo: replace the dlib cnn face detector with docker_face or
+        # huawei_face
         # Initialise the face detector
         if self.enable_cuda or self.use_cnn_face_detector:
             path_to_detector = os.path.join(
@@ -95,7 +98,8 @@ class FaceAlignment:
         fan_path = os.path.join(base_path, network_name)
 
         if not os.path.isfile(fan_path):
-            print("Downloading the Face Alignment Network(FAN). Please wait...")
+            print(
+                "Downloading the Face Alignment Network(FAN). Please wait...")
 
             request_file.urlretrieve(
                 "https://www.adrianbulat.com/downloads/python-fan/" +
@@ -104,9 +108,10 @@ class FaceAlignment:
         fan_weights = torch.load(
             fan_path,
             map_location=lambda storage,
-            loc: storage)
+                                loc: storage)
         fan_dict = {k.replace('module.', ''): v for k,
-                    v in fan_weights['state_dict'].items()}
+                                                    v in
+                    fan_weights['state_dict'].items()}
 
         self.face_alignemnt_net.load_state_dict(fan_dict)
 
@@ -129,10 +134,11 @@ class FaceAlignment:
             depth_weights = torch.load(
                 depth_model_path,
                 map_location=lambda storage,
-                loc: storage)
+                                    loc: storage)
             depth_dict = {
                 k.replace('module.', ''): v for k,
-                v in depth_weights['state_dict'].items()}
+                                                v in
+            depth_weights['state_dict'].items()}
             self.depth_prediciton_net.load_state_dict(depth_dict)
 
             if self.enable_cuda:
@@ -174,7 +180,8 @@ class FaceAlignment:
                     [d.right() - (d.right() - d.left()) / 2.0, d.bottom() -
                      (d.bottom() - d.top()) / 2.0])
                 center[1] = center[1] - (d.bottom() - d.top()) * 0.1
-                scale = (d.right() - d.left() + d.bottom() - d.top()) / 200.0
+                scale = (
+                                d.right() - d.left() + d.bottom() - d.top()) / 200.0
 
                 inp = crop(image, center, scale)
                 inp = torch.from_numpy(inp.transpose(
@@ -187,7 +194,8 @@ class FaceAlignment:
                     Variable(inp, volatile=True))[-1].data.cpu()
                 if self.flip_input:
                     out += flip(self.face_alignemnt_net(Variable(flip(inp),
-                                                                 volatile=True))[-1].data.cpu(), is_label=True)
+                                                                 volatile=True))[
+                                    -1].data.cpu(), is_label=True)
 
                 pts, pts_img = get_preds_fromhm(out, center, scale)
                 pts, pts_img = pts.view(68, 2) * 4, pts_img.view(68, 2)
@@ -196,7 +204,8 @@ class FaceAlignment:
                     heatmaps = np.zeros((68, 256, 256))
                     for i in range(68):
                         if pts[i, 0] > 0:
-                            heatmaps[i] = draw_gaussian(heatmaps[i], pts[i], 2)
+                            heatmaps[i] = draw_gaussian(heatmaps[i], pts[i],
+                                                        2)
                     heatmaps = torch.from_numpy(
                         heatmaps).view(1, 68, 256, 256).float()
                     if self.enable_cuda:
@@ -204,10 +213,12 @@ class FaceAlignment:
                     depth_pred = self.depth_prediciton_net(
                         Variable(
                             torch.cat(
-                                (inp, heatmaps), 1), volatile=True)).data.cpu().view(
+                                (inp, heatmaps), 1),
+                            volatile=True)).data.cpu().view(
                         68, 1)
                     pts_img = torch.cat(
-                        (pts_img, depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
+                        (pts_img,
+                         depth_pred * (1.0 / (256.0 / (200.0 * scale)))), 1)
 
                 landmarks.append(pts_img.numpy())
         else:

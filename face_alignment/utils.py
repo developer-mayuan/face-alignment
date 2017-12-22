@@ -27,8 +27,10 @@ def _gaussian(
     # generate kernel
     for i in range(height):
         for j in range(width):
-            gauss[i][j] = amplitude * math.exp(-(math.pow((j + 1 - center_x) / (
-                sigma_horz * width), 2) / 2.0 + math.pow((i + 1 - center_y) / (sigma_vert * height), 2) / 2.0))
+            gauss[i][j] = amplitude * math.exp(
+                -(math.pow((j + 1 - center_x) / (
+                        sigma_horz * width), 2) / 2.0 + math.pow(
+                    (i + 1 - center_y) / (sigma_vert * height), 2) / 2.0))
     if normalize:
         gauss = gauss / np.sum(gauss)
     return gauss
@@ -36,8 +38,10 @@ def _gaussian(
 
 def draw_gaussian(image, point, sigma):
     # Check if the gaussian is inside
-    ul = [math.floor(point[0] - 3 * sigma), math.floor(point[1] - 3 * sigma)]
-    br = [math.floor(point[0] + 3 * sigma), math.floor(point[1] + 3 * sigma)]
+    ul = [math.floor(point[0] - 3 * sigma),
+          math.floor(point[1] - 3 * sigma)]
+    br = [math.floor(point[0] + 3 * sigma),
+          math.floor(point[1] + 3 * sigma)]
     if (ul[0] > image.shape[1] or ul[1] >
             image.shape[0] or br[0] < 1 or br[1] < 1):
         return image
@@ -51,7 +55,10 @@ def draw_gaussian(image, point, sigma):
     img_y = [int(max(1, ul[1])), int(min(br[1], image.shape[0]))]
     assert (g_x[0] > 0 and g_y[1] > 0)
     image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]
-          ] = image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]] + g[g_y[0] - 1:g_y[1], g_x[0] - 1:g_x[1]]
+    ] = image[img_y[0] - 1:img_y[1], img_x[0] - 1:img_x[1]] + g[g_y[0] - 1:
+                                                                g_y[1],
+                                                              g_x[0] - 1:
+                                                              g_x[1]]
     image[image > 1] = 1
     return image
 
@@ -80,7 +87,8 @@ def crop(image, center, scale, resolution=256.0):
     # Crop around the center point
     """ Crops the image around the center. Input is expected to be an np.ndarray """
     ul = transform([1, 1], center, scale, resolution, True)
-    br = transform([resolution, resolution], center, scale, resolution, True)
+    br = transform([resolution, resolution], center, scale, resolution,
+                   True)
     # pad = math.ceil(torch.norm((ul - br).float()) / 2.0 - (br[0] - ul[0]) / 2.0)
     if image.ndim > 2:
         newDim = np.array([br[1] - ul[1], br[0] - ul[0],
@@ -98,7 +106,7 @@ def crop(image, center, scale, resolution=256.0):
     oldX = np.array([max(1, ul[0] + 1), min(br[0], wd)], dtype=np.int32)
     oldY = np.array([max(1, ul[1] + 1), min(br[1], ht)], dtype=np.int32)
     newImg[newY[0] - 1:newY[1], newX[0] - 1:newX[1]
-           ] = image[oldY[0] - 1:oldY[1], oldX[0] - 1:oldX[1], :]
+    ] = image[oldY[0] - 1:oldY[1], oldX[0] - 1:oldX[1], :]
     newImg = cv2.resize(newImg, dsize=(int(resolution), int(resolution)),
                         interpolation=cv2.INTER_LINEAR)
     return newImg
@@ -133,6 +141,7 @@ def get_preds_fromhm(hm, center=None, scale=None):
                     preds[i, j], center, scale, hm.size(2), True)
 
     return preds, preds_orig
+
 
 # From pyzolib/paths.py (https://bitbucket.org/pyzo/pyzolib/src/tip/paths.py)
 
@@ -185,7 +194,8 @@ def appdata_dir(appname=None, roaming=False):
     # Get path specific for this app
     if appname:
         if path == userDir:
-            appname = '.' + appname.lstrip('.')  # Make it a hidden directory
+            appname = '.' + appname.lstrip(
+                '.')  # Make it a hidden directory
         path = os.path.join(path, appname)
         if not os.path.isdir(path):  # pragma: no cover
             os.mkdir(path)
@@ -196,10 +206,14 @@ def appdata_dir(appname=None, roaming=False):
 
 def shuffle_lr(parts, pairs=None):
     if pairs is None:
-        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11], [6, 10],
-                 [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22], [36, 45],
-                 [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35], [32, 34],
-                 [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65], [59, 55], [58, 56]]
+        pairs = [[0, 16], [1, 15], [2, 14], [3, 13], [4, 12], [5, 11],
+                 [6, 10],
+                 [7, 9], [17, 26], [18, 25], [19, 24], [20, 23], [21, 22],
+                 [36, 45],
+                 [37, 44], [38, 43], [39, 42], [41, 46], [40, 47], [31, 35],
+                 [32, 34],
+                 [50, 52], [49, 53], [48, 54], [61, 63], [60, 64], [67, 65],
+                 [59, 55], [58, 56]]
     for matched_p in pairs:
         idx1, idx2 = matched_p[0], matched_p[1]
         tmp = np.copy(parts[..., idx1])
